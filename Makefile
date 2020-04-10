@@ -10,15 +10,17 @@ SRC = main.c
 TARGET = serial
 SD_CARD_PATH = /dev/sdb
 
-all	: ${SRC}
+all: ${TARGET}.sunxi
+${TARGET}.sunxi	: ${SRC}
 	${CC} ${CFLAGS} ${SRC} -o ${TARGET}.elf -T ${TARGET}.lds -Wl,-N
 	arm-none-eabi-objcopy -O binary ${TARGET}.elf ${TARGET}.bin
 	mksunxiboot ${TARGET}.bin ${TARGET}.sunxi
 
-write	:
+write	:${TARGET}.sunxi
 	sudo dd if=${TARGET}.sunxi of=${SD_CARD_PATH} bs=1024 seek=8
-	sync; sync; sync;
+	sudo sync; sudo sync; sudo sync;
 
 clean	:
-	rm -f ${TARGET}.elf ${TARGET}.bin
+	rm -f ${TARGET}.elf ${TARGET}.bin ${TARGET}.sunxi
+
 
