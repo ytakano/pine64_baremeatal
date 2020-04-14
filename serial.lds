@@ -17,7 +17,7 @@
 
 SECTIONS
 {
-	. = 0x0000;
+	. = 0x40008000;
 	.start    : { *(.start) }
 	.text     : { *(.text) }
 	/DISCARD/ : { *(.dynstr*) }

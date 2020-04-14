@@ -352,10 +352,7 @@ void led_test(void){
 int main(void)
 {
   *(unsigned int *)(PCR_PB_CFG0) = 0x00000100;
-	bases_init();
-	gpio_init();
-	uart0_init();
-	uart0_puts("\nHello takano World!!!!\n");
-	led_test();
-	return 0;
+  uart0_puts("\nHello takano World!!!!\n");
+  led_test();
+  return 0;
 }
