@@ -21,7 +21,7 @@ CFLAGS  = -O0 -nostdinc -nostdlib -nostartfiles
 SRC = led.c boot.S
 TARGET = serial
 SD_CARD_PATH = /dev/sdb
-AARCH64_START_ADDRESS=0x40008000
+AARCH64_START_ADDRESS=0x40080000
 SUNXI_FEL=sunxi-fel
 all: ${TARGET}.sunxi
 ${TARGET}.sunxi	: ${SRC}
