@@ -6,8 +6,8 @@ _start:
 	mov sp, x1
 
 	// Clear bss
-	ldr x1, =__bss_start
-	ldr w2, =__bss_size
+//	ldr x1, =__bss_start
+//	ldr w2, =__bss_size
 3:
 	cbz w2, 4f
 	str xzr, [x1], #8

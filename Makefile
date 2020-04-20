@@ -18,16 +18,21 @@ CFLAGS  = -O0 -nostdinc -nostdlib -nostartfiles
 
 #SRC = main.c boot.S
 #SRC = uart-aarch64.s
+#SRC = led.c boot.S mmu_a.c
 SRC = led.c boot.S
 TARGET = serial
 SD_CARD_PATH = /dev/sdb
 AARCH64_START_ADDRESS=0x40080000
 SUNXI_FEL=sunxi-fel
-all: ${TARGET}.sunxi
-${TARGET}.sunxi	: ${SRC}
+#LDSCRIPT=${TARGET}.ld
+LDSCRIPT=link.ld
+all: ${TARGET}.bin
+${TARGET}.bin	: ${SRC} ${LDSCRIPT}
 #	${CC} ${CFLAGS} ${SRC} -o ${TARGET}.elf -T ${TARGET}.lds -Wl,-N
-	${CC} ${CFLAGS} ${SRC} -o ${TARGET}.elf -T ${TARGET}.ld -Wl,-N
+	${CC} ${CFLAGS} ${SRC} -o ${TARGET}.elf -T ${LDSCRIPT} -Wl,-N
 	${OBJCOPY} -O binary ${TARGET}.elf ${TARGET}.bin
+
+${TARGET}.sunxi	: ${TARGET}.bin
 	mksunxiboot ${TARGET}.bin ${TARGET}.sunxi
 
 write	:${TARGET}.sunxi
