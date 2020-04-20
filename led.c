@@ -85,7 +85,7 @@ void led_test(void){
 		for(i = 0; i < 100000; i++);
 		*(unsigned int *)(PCR_PB_DAT) ^= val;
 		//		val ^= 0x04;
-		uart0_puts("\nHello takano World!!!!\n");
+		uart0_puts("\nHello 64bit World!!!!\n");
 	}
 	return;
 }

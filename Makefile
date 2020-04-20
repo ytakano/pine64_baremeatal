@@ -55,6 +55,10 @@ boot64:
 	sudo ${SUNXI_FEL} write ${AARCH64_START_ADDRESS} ${TARGET}.bin
 	sudo ${SUNXI_FEL} reset64 ${AARCH64_START_ADDRESS}
 
+boot:
+	sudo ${SUNXI_FEL} write ${AARCH64_START_ADDRESS} ${TARGET}.bin
+	sudo ${SUNXI_FEL} reset64 ${AARCH64_START_ADDRESS}
+
 
 sunxi-a64-spl32-ddr3.bin:
 	wget https://github.com/apritzel/pine64/raw/master/binaries/sunxi-a64-spl32-ddr3.bin
