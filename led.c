@@ -67,6 +67,10 @@
 void mmu_init();
 void uart0_putc(char c)
 {
+  int i;
+  for (i=0;i<1000;i++){
+    asm volatile ("nop");
+  }
   //  while (!(readl(UART0_LSR) & (1 << 6))) {}
 	writel(c, UART0_THR);
 }
@@ -82,18 +86,18 @@ void uart0_puts(const char *s)
 
 
 void led_test(void){
-	volatile int j;
-	unsigned long val = 0x04;
-	while (1) {
-	  	volatile int i;
-		for(i = 0; i < 500000; i++);
-		*(unsigned int *)(PCR_PB_DAT) ^= val;
-		//		val ^= 0x04;
-		if(((j++) % 1000) == 0){
-		  uart0_puts("\nHello 64bit World!!!!\n");
-		}
-	}
-	return;
+  volatile int j;
+  unsigned long val = 0x04;
+  while (1) {
+    volatile int i;
+    for(i = 0; i < 500000; i++);
+    *(unsigned int *)(PCR_PB_DAT) ^= val;
+    //		val ^= 0x04;
+    if(((j++) % 1000) == 0){
+      uart0_puts("\nHello 64bit World!!!!\n");
+    }
+  }
+  return;
 }
 
 int main(void)
