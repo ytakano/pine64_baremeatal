@@ -77,3 +77,5 @@ clean	:
 	rm -f ${TARGET}.elf ${TARGET}.bin ${TARGET}.sunxi
 
 
+mmu:
+	perl calc.pl >res
