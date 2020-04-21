@@ -18,8 +18,7 @@ CFLAGS  = -O0 -nostdinc -nostdlib -nostartfiles
 
 #SRC = main.c boot.S
 #SRC = uart-aarch64.s
-#SRC = led.c boot.S mmu_a.c
-SRC = led.c boot.S
+SRC = led.c boot.S mmu_a.c
 TARGET = serial
 SD_CARD_PATH = /dev/sdb
 AARCH64_START_ADDRESS=0x40080000
@@ -30,6 +29,7 @@ all: ${TARGET}.bin
 ${TARGET}.bin	: ${SRC} ${LDSCRIPT}
 #	${CC} ${CFLAGS} ${SRC} -o ${TARGET}.elf -T ${TARGET}.lds -Wl,-N
 	${CC} ${CFLAGS} ${SRC} -o ${TARGET}.elf -T ${LDSCRIPT} -Wl,-N
+	${OBJDUMP} -D ${TARGET}.elf > ${TARGET}.lst
 	${OBJCOPY} -O binary ${TARGET}.elf ${TARGET}.bin
 
 ${TARGET}.sunxi	: ${TARGET}.bin
@@ -55,10 +55,15 @@ transfer:
 	sunxi-fel -l
 	sunxi-fel -v spl ${TARGET}.sunxi
 
-boot64:
+boot64: ${TARGET}.bin
 	sudo ${SUNXI_FEL} spl sunxi-a64-spl32-ddr3.bin
 	sudo ${SUNXI_FEL} write ${AARCH64_START_ADDRESS} ${TARGET}.bin
 	sudo ${SUNXI_FEL} reset64 ${AARCH64_START_ADDRESS}
+
+boot2:
+	sudo ${SUNXI_FEL} spl sunxi-a64-spl32-ddr3.bin
+	sudo ${SUNXI_FEL} write ${AARCH64_START_ADDRESS} ${TARGET}.bin
+	sudo ${SUNXI_FEL} reset64 0x040080118
 
 boot:
 	sudo ${SUNXI_FEL} write ${AARCH64_START_ADDRESS} ${TARGET}.bin

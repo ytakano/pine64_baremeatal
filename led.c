@@ -61,10 +61,13 @@
 // =============================================================================
 // main
 // =============================================================================
+
+#define readl(addr)		(*((volatile unsigned long  *)(addr)))
 #define writel(v, addr)		(*((volatile unsigned long  *)(addr)) = (unsigned long)(v))
+void mmu_init();
 void uart0_putc(char c)
 {
-  //	while (!(readl(UART0_LSR) & (1 << 6))) {}
+  //  while (!(readl(UART0_LSR) & (1 << 6))) {}
 	writel(c, UART0_THR);
 }
 
@@ -79,13 +82,16 @@ void uart0_puts(const char *s)
 
 
 void led_test(void){
-	volatile int i;
+	volatile int j;
 	unsigned long val = 0x04;
 	while (1) {
-		for(i = 0; i < 100000; i++);
+	  	volatile int i;
+		for(i = 0; i < 500000; i++);
 		*(unsigned int *)(PCR_PB_DAT) ^= val;
 		//		val ^= 0x04;
-		uart0_puts("\nHello 64bit World!!!!\n");
+		if(((j++) % 1000) == 0){
+		  uart0_puts("\nHello 64bit World!!!!\n");
+		}
 	}
 	return;
 }
@@ -93,6 +99,8 @@ void led_test(void){
 int main(void)
 {
   *(unsigned int *)(PCR_PB_CFG0) = 0x00000100;
+  uart0_puts("\n\nStart 64bit World!!!!\n\n");
+  mmu_init();
   led_test();
   return 0;
 }

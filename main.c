@@ -340,11 +340,14 @@ void bases_init(void)
 void led_test(void){
 	volatile int i;
 	unsigned long val = 0x04;
+	volatile int j;
 	while (1) {
 		for(i = 0; i < 100000; i++);
 		*(unsigned int *)(PCR_PB_DAT) ^= val;
 		//		val ^= 0x04;
-		uart0_puts("\nHello takano World!!!!\n");
+		if(((j++) % 1000) == 0){
+		  //		  uart0_puts("\nHello takano World!!!!\n");
+		}
 	}
 	return;
 }
@@ -353,6 +356,7 @@ int main(void)
 {
   *(unsigned int *)(PCR_PB_CFG0) = 0x00000100;
   uart0_puts("\nHello takano World!!!!\n");
+  mmu_init();
   led_test();
   return 0;
 }
