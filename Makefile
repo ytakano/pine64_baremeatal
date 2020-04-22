@@ -18,7 +18,8 @@ CFLAGS  = -O0 -nostdinc -nostdlib -nostartfiles
 
 #SRC = main.c boot.S
 #SRC = uart-aarch64.s
-SRC = led.c boot.S mmu_a.c
+#SRC = led.c boot.S mmu_a.c
+SRC = led.c pine64.S mmu_a.c exception.c
 TARGET = serial
 SD_CARD_PATH = /dev/sdb
 AARCH64_START_ADDRESS=0x40080000

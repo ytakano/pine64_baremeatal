@@ -4,21 +4,15 @@ typedef long int64_t;
 typedef unsigned int uint32_t;
 void uart0_putc(char c);
 void uart0_puts(const char *s);
-#define __device_start (0x01C00000)
-#define __device_end   (0x01F10000)
-
-//extern int64_t* __device_start;
-//extern int64_t* __device_end;
+extern int64_t* __device_start;
+extern int64_t* __device_end;
 extern int64_t* __data_start;
 extern int64_t* __data_end;
 extern int64_t* __ram_start;
-//extern int64_t* __ram_start;
-//extern int64_t* __bss_start;
-//extern int64_t* __bss_end;
-#define  __ram_start (0x40080000)
-#define  __ram_end   (0x40800000)
-#define  __bss_start (0x40480000)
-#define  __bss_end   (0x404C0000)
+extern int64_t* __ram_start;
+extern int64_t* __ram_end;
+extern int64_t* __bss_start;
+extern int64_t* __bss_end;
 
 extern int64_t* __no_cache;
 extern int64_t* __stack_start;
@@ -30,22 +24,14 @@ extern int64_t* __stack_el0_end;
 extern int64_t* __stack_el0_start;
 extern int64_t* __stack_end;
 
-//extern int64_t* __tt_firm_start;
-//extern int64_t* __tt_firm_end;
-//extern int64_t* __tt_el1_ttbr0_start;
-//extern int64_t* __tt_el1_ttbr0_end;
-//extern int64_t* __tt_el1_ttbr1_start;
-//extern int64_t* __tt_el1_ttbr1_end;
-#define __tt_firm_start      (0x404D0000)
-#define __tt_firm_end        (0x404E0000)
-#define __tt_el1_ttbr0_start (0x404E0000)
-#define __tt_el1_ttbr0_end   (0x404E0000)
-#define __tt_el1_ttbr1_start (0x404F0000)
-#define __tt_el1_ttbr1_end   (0x40500000)
-
+extern int64_t* __tt_firm_start;
+extern int64_t* __tt_firm_end;
+extern int64_t* __tt_el1_ttbr0_start;
+extern int64_t* __tt_el1_ttbr0_end;
+extern int64_t* __tt_el1_ttbr1_start;
+extern int64_t* __tt_el1_ttbr1_end;
 extern int64_t* __el0_heap_start;
 extern int64_t* __el0_heap_end;
-
 extern int64_t* _end;
 
 #define PCR_CPU_X_BASE_ADDR		(0x01C20800)
@@ -75,27 +61,8 @@ static void uart_puts_for_c(const char *s)
 	}
 }
 
-void  uart0_hex(uint64_t h){
-  int i;
-  
-  for (i=60; i>=0;i-=4){
-    uint64_t n = (h>>i) & 0xF;
-    n += n > 9 ? 0x37 : 0x30;
-    uart_putc_for_c(n);
-  }
-}
-
-void  uart0_byte(uint64_t h){
-  int i;
-  
-  uint64_t n = (h>>4) & 0xF;
-  n += n > 9 ? 0x37 : 0x30;
-  uart_putc_for_c(n);
-  n = h & 0xF;
-  n += n > 9 ? 0x37 : 0x30;
-  uart_putc_for_c(n);
-
-}
+void  uart0_hex(uint64_t h);
+void  uart0_byte(uint64_t h);
 
 
 uint64_t get_device_start(void){
@@ -201,12 +168,14 @@ static const void init_l3_page_table(uint64_t *l3_page_table,
   }
 }
 
-static const uint64_t device_start  = (uint64_t)(__device_start);
-static const uint64_t device_end    = (uint64_t)(__device_end);
-static const uint64_t ram_start     = (uint64_t)(__ram_start);
-static const uint64_t ram_end       = (uint64_t)(__ram_end);
-static const uint64_t el3_table_top = (uint64_t)(__tt_firm_start);
-static const uint64_t tt_firm_start = (uint64_t)(__tt_firm_start);
+static const uint64_t device_start  = (uint64_t)(&__device_start);
+static const uint64_t device_end    = (uint64_t)(&__device_end);
+static const uint64_t ram_start     = (uint64_t)(&__ram_start);
+static const uint64_t stack_end     = (uint64_t)(&__stack_end);
+static const uint64_t ram_end       = (uint64_t)(&__ram_end);
+static const uint64_t tt_firm_start = (uint64_t)(&__tt_firm_start);
+static const uint64_t ttbr0         = (uint64_t)(&__tt_el1_ttbr0_start);
+static const uint64_t ttbr1         = (uint64_t)(&__tt_el1_ttbr1_start);
 
 uint64_t init_table_flat(uint64_t table_addr){
   // setup L2, L3 table for device
@@ -220,7 +189,7 @@ uint64_t init_table_flat(uint64_t table_addr){
 
   uint64_t *i;
 
-  for(i=table_addr;(uint64_t)i<(uint64_t)table_addr+page_table_size*8;i++){
+  for(i=(uint64_t*)table_addr;(uint64_t)i<(uint64_t)table_addr+page_table_size*8;i++){
     *i = 0;
   }
   
@@ -232,7 +201,7 @@ uint64_t init_table_flat(uint64_t table_addr){
   init_l3_page_table((uint64_t*)l3_device_table,
 		     device_start,
 		     device_start, device_end,
-		     FLAG_L3_NS | FLAG_L3_XN | FLAG_L3_PXN | FLAG_L3_AF | FLAG_L3_OSH | FLAG_L3_SH_RW_RW | FLAG_L3_ATTR_DEV);
+   		     FLAG_L3_NS | FLAG_L3_XN | FLAG_L3_PXN | FLAG_L3_AF | FLAG_L3_OSH | FLAG_L3_SH_RW_RW | FLAG_L3_ATTR_DEV);
 
   // ram_start    = 0x40080000;
   // ram_end      = 0x48000000;
@@ -243,7 +212,12 @@ uint64_t init_table_flat(uint64_t table_addr){
   init_l3_page_table((uint64_t*)l3_ram_table,
 		     ram_start,
 		     ram_start, ram_end,
-		     FLAG_L3_AF | FLAG_L3_XN | FLAG_L3_PXN | FLAG_L3_ISH | FLAG_L3_SH_RW_RW | FLAG_L3_ATTR_MEM);
+		     FLAG_L3_AF | FLAG_L3_ISH | FLAG_L3_SH_RW_RW | FLAG_L3_ATTR_MEM);
+  // 		     FLAG_L3_AF | FLAG_L3_XN | FLAG_L3_PXN | FLAG_L3_ISH | FLAG_L3_SH_RW_RW | FLAG_L3_ATTR_MEM);
+  init_l3_page_table((uint64_t*)l3_ram_table,
+		     ram_start,
+		     tt_firm_start, ram_end,
+		     FLAG_L3_NS | FLAG_L3_XN | FLAG_L3_PXN | FLAG_L3_AF | FLAG_L3_OSH | FLAG_L3_SH_RW_RW | FLAG_L3_ATTR_NC);
 }
 
 
@@ -302,13 +276,10 @@ void mask_el1(){
 
 void init_el1(){
 
-  uint64_t ttbr0 = (uint64_t)(__tt_el1_ttbr0_start);
   init_table_flat(ttbr0);
-
   //
   // mask el0 stack to detect stack over flow
   //
-  uint64_t ttbr1 = (uint64_t)(__tt_el1_ttbr1_start);
   init_table_flat(ttbr1);
 
   uint64_t mmfr;
@@ -356,20 +327,20 @@ void init_el3(){
 
     // tell the MMU where our translation tables are.
   //asm volatile("msr ttbr0_el3, %0" : : "r" (tt_firm_start + 1));
-  asm volatile("msr ttbr0_el3, %0" : : "r" (tt_firm_start));
+  asm volatile("msr ttbr0_el3, %0" : : "r" (tt_firm_start+1));
 
     // finally, toggle some bits in system control register to enable page translation
-  uint32_t sctlr;
+  uint64_t sctlr;
   asm volatile("dsb ish; isb; mrs %0, sctlr_el3" : "=r" (sctlr));
-  uart0_puts("init_el3:sctlr=");
-  uart0_hex(sctlr);
-  uart0_puts("\n");
-  sctlr = update_sctlr(sctlr);
-  uart0_puts("init_el3:sctlr=");
-  uart0_hex(sctlr);
-  uart0_puts("\n");
-  dump_el3_table();
-  asm volatile("msr sctlr_el3, %0; dsb sy; isb" : : "r" (sctlr));
+  // uart0_puts("init_el3:sctlr=");
+  //  uart0_hex(sctlr);
+  //  uart0_puts("\n");
+  uint64_t new_sctlr = update_sctlr(sctlr);
+  //  uart0_puts("init_el3:sctlr=");
+  //  uart0_hex(new_sctlr);
+  //  uart0_puts("\n");
+  //  dump_el3_table();
+  asm volatile("msr sctlr_el3, %0; dsb sy; isb" : : "r" (new_sctlr));
 }
 
 void enable_mmu(){
@@ -401,14 +372,43 @@ void dump_el3_table(){
   }
 }
 
+//static const uint64_t device_start  = (uint64_t)(&__device_start);
+//static const uint64_t device_end    = (uint64_t)(&__device_end);
+//static const uint64_t ram_start     = (uint64_t)(&__ram_start);
+//static const uint64_t stack_end     = (uint64_t)(&__stack_end);
+//static const uint64_t ram_end       = (uint64_t)(&__ram_end);
+//static const uint64_t tt_firm_start = (uint64_t)(&__tt_firm_start);
+//static const uint64_t ttbr0         = (uint64_t)(&__tt_el1_ttbr0_start);
+//static const uint64_t ttbr1         = (uint64_t)(&__tt_el1_ttbr1_start);
+
+
 void mmu_init(){
   uart0_puts("mmu_init start\n");
+
+
+  uart0_puts(  "device_start =");
+  uart0_hex(device_start);
+  uart0_puts("\ndevice_end   =");
+  uart0_hex(device_end);
+  uart0_puts("\nram_start    =");
+  uart0_hex(ram_start);
+  uart0_puts("\nstarck_end   =");
+  uart0_hex(stack_end);
+  uart0_puts("\ntt_firm_start=");
+  uart0_hex(tt_firm_start);
+  uart0_puts("\nttbr0        =");
+  uart0_hex(ttbr0);
+  uart0_puts("\nttbr1        =");
+  uart0_hex(ttbr1);
+  uart0_puts("\nram_end      =");
+  uart0_hex(ram_end);
+  
   uart0_puts("mmu_init el1 start\n");
   init_el1();
   uart0_puts("mmu_init el3 start\n");
   init_el3();
-  dump_el3_table();
-  led_blink();
+  //  dump_el3_table();
+  ///  led_blink();
   enable_mmu();
   uart0_puts("mmu_init end\n");
 }

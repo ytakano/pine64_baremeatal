@@ -49,6 +49,9 @@
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
+typedef unsigned long uint64_t;
+typedef long int64_t;
+typedef unsigned int uint32_t;
 
 #define SUNXI_UART0_BASE	0x01C28000
 #define UART0_THR ((SUNXI_UART0_BASE) + 0x0)    /* transmit holding register */
@@ -83,7 +86,27 @@ void uart0_puts(const char *s)
 		uart0_putc(*s++);
 	}
 }
+void  uart0_hex(uint64_t h){
+  int i;
+  
+  for (i=60; i>=0;i-=4){
+    uint64_t n = (h>>i) & 0xF;
+    n += n > 9 ? 0x37 : 0x30;
+    uart0_putc(n);
+  }
+}
 
+void  uart0_byte(uint64_t h){
+  int i;
+  
+  uint64_t n = (h>>4) & 0xF;
+  n += n > 9 ? 0x37 : 0x30;
+  uart0_putc(n);
+  n = h & 0xF;
+  n += n > 9 ? 0x37 : 0x30;
+  uart0_putc(n);
+
+}
 
 void led_test(void){
   volatile int j;
